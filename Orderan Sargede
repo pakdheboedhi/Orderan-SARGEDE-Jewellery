@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antrian Servis SARGEDE JEWELLERY</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <h2>Antrian Servis & Pembuatan Perhiasan</h2>
+    
+    <label>Nama Pelanggan:</label>
+    <input type="text" id="nama"><br>
+
+    <label>No HP Pelanggan:</label>
+    <input type="text" id="hp"><br>
+
+    <label>Jenis Servis:</label>
+    <input type="text" id="jenis-servis"><br>
+
+    <label>Detail Permintaan:</label>
+    <textarea id="detail-pembuatan"></textarea><br>
+
+    <label>Estimasi Selesai:</label>
+    <input type="date" id="estimasi"><br>
+
+    <label>Karyawan:</label>
+    <select id="karyawan">
+        <option value="Pakdhe Boedhi">Pakdhe Boedhi</option>
+        <option value="Mba Redknow">Mba Redknow</option>
+    </select><br>
+
+    <label>Tukang:</label>
+    <input type="text" id="tukang" placeholder="Masukkan No HP Tukang"><br>
+
+    <label>Gambar Referensi:</label>
+    <input type="file" id="gambar-referensi"><br><br>
+
+    <button onclick="generatePDF()">Buat Laporan PDF</button>
+
+    <script>
+        function generatePDF() {
+            let { jsPDF } = window.jspdf;
+            let doc = new jsPDF();
+            doc.setFontSize(12);
+            doc.text("Laporan Antrian Servis & Pembuatan Perhiasan", 20, 20);
+            doc.text("SARGEDE JEWELLERY", 20, 30);
+            doc.text(`Nama Pelanggan: ${document.getElementById("nama").value}`, 20, 40);
+            doc.text(`No HP Pelanggan: ${document.getElementById("hp").value}`, 20, 50);
+            doc.text(`Jenis Servis: ${document.getElementById("jenis-servis").value}`, 20, 60);
+            doc.text(`Detail Permintaan: ${document.getElementById("detail-pembuatan").value}`, 20, 70);
+            doc.text(`Estimasi Selesai: ${document.getElementById("estimasi").value}`, 20, 80);
+            doc.text(`Karyawan: ${document.getElementById("karyawan").value}`, 20, 90);
+            doc.text(`Tukang: ${document.getElementById("tukang").value}`, 20, 100);
+
+            let gambarInput = document.getElementById("gambar-referensi").files[0];
+            if (gambarInput) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let imgData = e.target.result;
+                    doc.addImage(imgData, "JPEG", 20, 110, 80, 80);
+                    doc.text("Gambar Referensi dari Pelanggan", 20, 200);
+                    saveAndSendPDF(doc);
+                };
+                reader.readAsDataURL(gambarInput);
+            } else {
+                saveAndSendPDF(doc);
+            }
+        }
+
+        function saveAndSendPDF(doc) {
+            let pdfFile = doc.output("blob");
+            let fileURL = URL.createObjectURL(pdfFile);
+            
+            let tukang = document.getElementById("tukang").value;
+            let pesan = `Halo, berikut laporan antrian servis dari SARGEDE JEWELLERY:\n\n${fileURL}`;
+            let link = `https://wa.me/${tukang}?text=${encodeURIComponent(pesan)}`;
+            
+            // Menyediakan opsi unduh PDF sebelum dikirim ke WhatsApp
+            let downloadLink = document.createElement("a");
+            downloadLink.href = fileURL;
+            downloadLink.download = "Laporan_Servis.pdf";
+            downloadLink.click();
+
+            // Mengirim ke WhatsApp
+            window.open(link, "_blank");
+        }
+    </script>
+</body>
+</html>
